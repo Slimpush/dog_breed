@@ -1,16 +1,18 @@
 from django.urls import path
-from rest_framework.routers import DefaultRouter
-from controllers import BreedDetail, BreedList, DogList, DogDetail
+
+from .controllers import BreedDetail, BreedList, DogDetail, DogList
 
 
-router = DefaultRouter()
-
-router.register(r'breeds', BreedList, basename='breed-list')
-router.register(r'breeds', BreedDetail, basename='breed-detail')
+app_name = 'api'
 
 urlpatterns = [
-    path('dogs/', DogList.as_view(), name='dog-list'),
-    path('dogs/<int:pk>/', DogDetail.as_view(), name='dog-detail'),
-]
+    path("dogs/", DogList.as_view(), name="dog-list"),
+    path("dogs/<int:pk>/", DogDetail.as_view(), name="dog-detail"),
 
-urlpatterns += router.urls
+    path("breeds/", BreedList.as_view(
+        {'get': 'get', 'post': 'post'}),
+        name="breed-list"),
+    path("breeds/<int:pk>/", BreedDetail.as_view(
+        {'get': 'get', 'put': 'put', 'delete': 'delete'}),
+        name="breed-detail"),
+]
