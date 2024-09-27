@@ -1,5 +1,3 @@
-from typing import Optional
-
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.request import Request
@@ -10,6 +8,21 @@ from .models import Breed, Dog
 from .serializer import BreedSerializer, DogSerializer
 
 
+def save_object(serializer_class, request_data, instance=None):
+    serializer = (
+        serializer_class(instance, data=request_data)
+        if instance
+        else serializer_class(data=request_data)
+    )
+    if serializer.is_valid():
+        serializer.save()
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED if not instance else status.HTTP_200_OK,
+        )
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class DogList(APIView):
     def get(self, request: Request) -> Response:
         dogs = Dog.objects.all()
@@ -17,11 +30,7 @@ class DogList(APIView):
         return Response(serializer.data)
 
     def post(self, request: Request) -> Response:
-        serializer = DogSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return save_object(DogSerializer, request.data)
 
 
 class DogDetail(APIView):
@@ -32,35 +41,11 @@ class DogDetail(APIView):
 
     def put(self, request: Request, pk: int) -> Response:
         dog = get_object_or_404(Dog, pk=pk)
-        serializer = DogSerializer(dog, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return save_object(DogSerializer, request.data, dog)
 
     def delete(self, request: Request, pk: int) -> Response:
         dog = get_object_or_404(Dog, pk=pk)
         dog.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class BreedDetail(viewsets.ViewSet):
-    def get(self, request: Request, pk: Optional[int] = None) -> Response:
-        breed = get_object_or_404(Breed, pk=pk)
-        serializer = BreedSerializer(breed)
-        return Response(serializer.data)
-
-    def put(self, request: Request, pk: Optional[int] = None) -> Response:
-        breed = get_object_or_404(Breed, pk=pk)
-        serializer = BreedSerializer(breed, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request: Request, pk: Optional[int] = None) -> Response:
-        breed = get_object_or_404(Breed, pk=pk)
-        breed.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -71,8 +56,20 @@ class BreedList(viewsets.ViewSet):
         return Response(serializer.data)
 
     def post(self, request: Request) -> Response:
-        serializer = BreedSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return save_object(BreedSerializer, request.data)
+
+
+class BreedDetail(viewsets.ViewSet):
+    def get(self, request: Request, pk: int) -> Response:
+        breed = get_object_or_404(Breed, pk=pk)
+        serializer = BreedSerializer(breed)
+        return Response(serializer.data)
+
+    def put(self, request: Request, pk: int) -> Response:
+        breed = get_object_or_404(Breed, pk=pk)
+        return save_object(BreedSerializer, request.data, breed)
+
+    def delete(self, request: Request, pk: int) -> Response:
+        breed = get_object_or_404(Breed, pk=pk)
+        breed.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

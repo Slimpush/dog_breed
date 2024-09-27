@@ -8,6 +8,11 @@ class DogSerializer(serializers.ModelSerializer):
         model = Dog
         fields = "__all__"
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation["breed"] = instance.breed.name
+        return representation
+
 
 class BreedSerializer(serializers.ModelSerializer):
     class Meta:
