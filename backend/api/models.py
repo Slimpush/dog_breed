@@ -1,9 +1,14 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from dog_breed.settings import (MAX_LENGHT_COLOR, MAX_LENGHT_FAVORITE,
-                                MAX_LENGTH_BREED, MAX_LENGTH_GENDER,
-                                MAX_LENGTH_NAME, MAX_LENGTH_SIZE)
+from dog_breed.settings import (
+    MAX_LENGHT_COLOR,
+    MAX_LENGHT_FAVORITE,
+    MAX_LENGTH_BREED,
+    MAX_LENGTH_GENDER,
+    MAX_LENGTH_NAME,
+    MAX_LENGTH_SIZE,
+)
 
 
 class Breed(models.Model):
