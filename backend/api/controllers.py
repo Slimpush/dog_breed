@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -8,7 +8,7 @@ from .models import Breed, Dog
 from .serializer import BreedSerializer, DogSerializer
 
 
-def save_object(serializer_class, request_data, instance=None):
+def _save_object(serializer_class, request_data, instance=None):
     serializer = (
         serializer_class(instance, data=request_data)
         if instance
@@ -30,7 +30,7 @@ class DogList(APIView):
         return Response(serializer.data)
 
     def post(self, request: Request) -> Response:
-        return save_object(DogSerializer, request.data)
+        return _save_object(DogSerializer, request.data)
 
 
 class DogDetail(APIView):
@@ -41,7 +41,7 @@ class DogDetail(APIView):
 
     def put(self, request: Request, pk: int) -> Response:
         dog = get_object_or_404(Dog, pk=pk)
-        return save_object(DogSerializer, request.data, dog)
+        return _save_object(DogSerializer, request.data, dog)
 
     def delete(self, request: Request, pk: int) -> Response:
         dog = get_object_or_404(Dog, pk=pk)
@@ -49,27 +49,18 @@ class DogDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class BreedList(viewsets.ViewSet):
-    def get(self, request: Request) -> Response:
-        breeds = Breed.objects.all()
-        serializer = BreedSerializer(breeds, many=True)
-        return Response(serializer.data)
-
-    def post(self, request: Request) -> Response:
-        return save_object(BreedSerializer, request.data)
+class BreedList(
+    viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin
+):
+    queryset = Breed.objects.all()
+    serializer_class = BreedSerializer
 
 
-class BreedDetail(viewsets.ViewSet):
-    def get(self, request: Request, pk: int) -> Response:
-        breed = get_object_or_404(Breed, pk=pk)
-        serializer = BreedSerializer(breed)
-        return Response(serializer.data)
-
-    def put(self, request: Request, pk: int) -> Response:
-        breed = get_object_or_404(Breed, pk=pk)
-        return save_object(BreedSerializer, request.data, breed)
-
-    def delete(self, request: Request, pk: int) -> Response:
-        breed = get_object_or_404(Breed, pk=pk)
-        breed.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+class BreedDetail(
+    viewsets.GenericViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+):
+    queryset = Breed.objects.all()
+    serializer_class = BreedSerializer
