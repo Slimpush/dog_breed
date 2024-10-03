@@ -55,6 +55,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "dog_breed.wsgi.application"
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        },
+    },
+}
 
 DATABASES = {
     "default": {
@@ -96,13 +112,6 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = BASE_DIR / "static"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-MAX_LENGTH_NAME = 20
-MAX_LENGTH_BREED = 30
-MAX_LENGTH_GENDER = 7
-MAX_LENGHT_COLOR = 30
-MAX_LENGHT_FAVORITE = 100
-MAX_LENGTH_SIZE = 15

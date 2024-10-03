@@ -1,53 +1,53 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from dog_breed.settings import (
-    MAX_LENGHT_COLOR,
-    MAX_LENGHT_FAVORITE,
-    MAX_LENGTH_BREED,
-    MAX_LENGTH_GENDER,
-    MAX_LENGTH_NAME,
-    MAX_LENGTH_SIZE,
-)
+
+RATING_VALIDATORS = [MinValueValidator(1), MaxValueValidator(5)]
 
 
 class Breed(models.Model):
+    SIZE_TINY = "tiny"
+    SIZE_SMALL = "small"
+    SIZE_MEDIUM = "medium"
+    SIZE_LARGE = "large"
+
     SIZE_CHOICES = [
-        ("Tiny", "Крошечная"),
-        ("Small", "Маленькая"),
-        ("Mediun", "Среднего размера"),
-        ("Large", "Большая"),
+        (SIZE_TINY, "крошечная"),
+        (SIZE_SMALL, "маленькая"),
+        (SIZE_MEDIUM, "средняя"),
+        (SIZE_LARGE, "большая"),
     ]
 
     name = models.CharField(
-        max_length=MAX_LENGTH_BREED,
+        max_length=100,
         unique=True,
         verbose_name="Название породы",
     )
     size = models.CharField(
-        max_length=MAX_LENGTH_SIZE,
+        max_length=20,
         choices=SIZE_CHOICES,
         verbose_name="Размер собаки",
     )
     friendliness = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        validators=RATING_VALIDATORS,
         verbose_name="Дружелюбность (от 1 до 5)",
     )
     trainability = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        validators=RATING_VALIDATORS,
         verbose_name="Обучаемость (от 1 до 5)",
     )
     shedding_amount = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        validators=RATING_VALIDATORS,
         verbose_name="Количество шерсти при линьке (от 1 до 5)",
     )
     exercise_needs = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        validators=RATING_VALIDATORS,
         verbose_name="Потребность в активности (от 1 до 5)",
     )
 
     class Meta:
         verbose_name = "Порода собаки"
+        verbose_name_plural = "Породы собак"
         ordering = ("name",)
 
     def __str__(self):
@@ -55,13 +55,16 @@ class Breed(models.Model):
 
 
 class Dog(models.Model):
-    GENDER_CHOICE = [
-        ("male", "мужской"),
-        ("female", "женский"),
+    GENDER_MALE = "male"
+    GENDER_FEMALE = "female"
+
+    GENDER_CHOICES = [
+        (GENDER_MALE, "мужской"),
+        (GENDER_FEMALE, "женский"),
     ]
 
     name = models.CharField(
-        max_length=MAX_LENGTH_NAME,
+        max_length=50,
         verbose_name="Имя собаки",
     )
     age = models.IntegerField(
@@ -71,23 +74,24 @@ class Dog(models.Model):
         Breed,
         verbose_name="Порода собаки",
         related_name="breed",
-        on_delete=models.CASCADE,
+        null=True,
+        on_delete=models.SET_NULL,
     )
     gender = models.CharField(
-        max_length=MAX_LENGTH_GENDER,
+        max_length=10,
         verbose_name="Пол собаки",
-        choices=GENDER_CHOICE,
+        choices=GENDER_CHOICES,
     )
     color = models.CharField(
-        max_length=MAX_LENGHT_COLOR,
+        max_length=30,
         verbose_name="Окрас собаки",
     )
     favorite_food = models.CharField(
-        max_length=MAX_LENGHT_FAVORITE,
+        max_length=100,
         verbose_name="Любимая еда",
     )
     favorite_toy = models.CharField(
-        max_length=MAX_LENGHT_FAVORITE,
+        max_length=100,
         verbose_name="Любимая игрушка",
     )
 

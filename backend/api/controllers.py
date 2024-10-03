@@ -25,7 +25,7 @@ def _save_object(serializer_class, request_data, instance=None):
 
 class DogList(APIView):
     def get(self, request: Request) -> Response:
-        dogs = Dog.objects.all()
+        dogs = Dog.objects.select_related('breed').all()
         serializer = DogSerializer(dogs, many=True)
         return Response(serializer.data)
 
@@ -50,17 +50,17 @@ class DogDetail(APIView):
 
 
 class BreedList(
-    viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin
+    mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet,
 ):
     queryset = Breed.objects.all()
     serializer_class = BreedSerializer
 
 
 class BreedDetail(
-    viewsets.GenericViewSet,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
 ):
     queryset = Breed.objects.all()
     serializer_class = BreedSerializer
